@@ -1,9 +1,11 @@
 import json
 
-# Find a less dum way to do this
 # EVERYTHING BREAKS WITH NEWLINE IN JSON KILL ME
-dbr = open("test.json", "r")
-dbfr = json.load(dbr)
+try:
+    dbfr = json.load(open("test.json"))
+except FileNotFoundError:
+    dbfr = {"books": {}}
+
 dbw = open("test.json", "w")
 
 
@@ -39,9 +41,9 @@ def delBooks():
 
 def upBooks():
     oname = input("name")
-    tmp = dbfr["books"].get(oname)
 
     try:
+        tmp = dbfr["books"].get(oname)
         dbfr["books"].pop(oname)
 
         for i in tmp:
