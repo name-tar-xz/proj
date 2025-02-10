@@ -1,3 +1,9 @@
+import json
+
+db = open("test.json", "r+")
+dbfr = json.load(db)
+
+
 def selector(ls: list[str], funcs: list):
     if len(funcs) != len(ls):
         print("BOOM BOOM")
