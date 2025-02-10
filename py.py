@@ -56,6 +56,17 @@ def upBooks():
         print("not found")
 
 
+def search():
+    search = input("search")
+    k = True
+    for i in dbfr["books"]:
+        if search in i:
+            k = False
+            print("found", i)
+    if k:
+        print("not found")
+
+
 ctrl = 0
 
 
@@ -66,8 +77,8 @@ def die():
 
 while ctrl == 0:
     selector(
-        ["Add Books", "Remove Books", "Update Books", "exit"],
-        [addBooks, delBooks, upBooks, die],
+        ["Add Books", "Remove Books", "Update Books", "search", "exit"],
+        [addBooks, delBooks, upBooks, search, die],
     )
 
 dbw.write(json.dumps(dbfr))
