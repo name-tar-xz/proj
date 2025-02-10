@@ -46,10 +46,13 @@ def upBooks():
         for i in tmp:
             new = input("Enter new " + i + " (leave blank for no change)")
             if new != "":
-                tmp[i] = new
+                if i == "genres":
+                    tmp[i] = new.split()
+                else:
+                    tmp[i] = new
                 new = ""
 
-        nname = input("new name")
+        nname = input("new name") or oname
         dbfr["books"].update({nname: tmp})
     except KeyError:
         print("not found")
