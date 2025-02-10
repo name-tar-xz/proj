@@ -2,9 +2,9 @@ import json
 
 # Find a less dum way to do this
 # EVERYTHING BREAKS WITH NEWLINE IN JSON KILL ME
-db = open("test.json", "r+")
-dbfr = json.load(db)
-db.seek(0)  # does smth evryth brokey wo it
+dbr = open("test.json", "r")
+dbfr = json.load(dbr)
+dbw = open("test.json", "w")
 
 
 def selector(ls: list[str], funcs: list):
@@ -25,9 +25,18 @@ def selector(ls: list[str], funcs: list):
 
 def addBooks():
     name = input("name")
-    book = {"name": name}
-    dbfr["books"].append(book)
-    json.dump(dbfr, db)
+    dbfr["books"].update({name: {}})
 
 
-selector(["Add Books"], [addBooks])
+def delBooks():
+    name = input("name")
+    for i in dbfr["books"]:
+        if i == name:
+            dbfr["books"].pop(name)
+            break
+
+    print("not found")
+
+
+selector(["Add Books", "Remove Books"], [addBooks, delBooks])
+dbw.write(json.dumps(dbfr))
