@@ -1,6 +1,5 @@
 import json
 
-# EVERYTHING BREAKS WITH NEWLINE IN JSON KILL ME
 try:
     dbfr = json.load(open("test.json"))
 except FileNotFoundError:
@@ -10,9 +9,6 @@ dbw = open("test.json", "w")
 
 
 def selector(ls, funcs):
-    if len(funcs) != len(ls):
-        print("BOOM BOOM")
-
     for k in range(0, len(ls)):
         print(k + 1, ":", ls[k])
 
@@ -28,7 +24,8 @@ def selector(ls, funcs):
 def addBooks():
     name = input("name")
     pgs = input("pages")
-    dbfr["books"].update({name: {"pages": pgs}})
+    gen = input("genres (separated by spaces)")
+    dbfr["books"].update({name: {"pages": pgs, "genres": gen.split()}})
 
 
 def delBooks():
@@ -58,11 +55,16 @@ def upBooks():
         print("not found")
 
 
+def listBooks():
+    for i in dbfr["books"]:
+        print(i)
+
+
 def search():
-    search = input("search")
+    search = input("search").lower()
     k = True
     for i in dbfr["books"]:
-        if search in i:
+        if search in i.lower():
             k = False
             print("found", i)
     if k:
@@ -79,8 +81,8 @@ def die():
 
 while ctrl == 0:
     selector(
-        ["Add Books", "Remove Books", "Update Books", "search", "exit"],
-        [addBooks, delBooks, upBooks, search, die],
+        ["Add Books", "Remove Books", "Update Books", "search", "List Books", "exit"],
+        [addBooks, delBooks, upBooks, search, listBooks, die],
     )
 
 dbw.write(json.dumps(dbfr))
