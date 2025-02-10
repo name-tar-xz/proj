@@ -9,7 +9,7 @@ except FileNotFoundError:
 dbw = open("test.json", "w")
 
 
-def selector(ls: list[str], funcs: list):
+def selector(ls, funcs):
     if len(funcs) != len(ls):
         print("BOOM BOOM")
 
