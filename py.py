@@ -25,13 +25,33 @@ def selector(ls: list[str], funcs: list):
 
 def addBooks():
     name = input("name")
-    dbfr["books"].update({name: {}})
+    pgs = input("pages")
+    dbfr["books"].update({name: {"pages": pgs}})
 
 
 def delBooks():
     name = input("name")
     try:
         dbfr["books"].pop(name)
+    except KeyError:
+        print("not found")
+
+
+def upBooks():
+    oname = input("name")
+    tmp = dbfr["books"].get(oname)
+
+    try:
+        dbfr["books"].pop(oname)
+
+        for i in tmp:
+            new = input("Enter new " + i + " (leave blank for no change)")
+            if new != "":
+                tmp[i] = new
+                new = ""
+
+        nname = input("new name")
+        dbfr["books"].update({nname: tmp})
     except KeyError:
         print("not found")
 
@@ -45,6 +65,9 @@ def die():
 
 
 while ctrl == 0:
-    selector(["Add Books", "Remove Books", "exit"], [addBooks, delBooks, die])
+    selector(
+        ["Add Books", "Remove Books", "Update Books", "exit"],
+        [addBooks, delBooks, upBooks, die],
+    )
 
 dbw.write(json.dumps(dbfr))
