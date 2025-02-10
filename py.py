@@ -30,13 +30,21 @@ def addBooks():
 
 def delBooks():
     name = input("name")
-    for i in dbfr["books"]:
-        if i == name:
-            dbfr["books"].pop(name)
-            break
-
-    print("not found")
+    try:
+        dbfr["books"].pop(name)
+    except KeyError:
+        print("not found")
 
 
-selector(["Add Books", "Remove Books"], [addBooks, delBooks])
+ctrl = 0
+
+
+def die():
+    global ctrl
+    ctrl = 1
+
+
+while ctrl == 0:
+    selector(["Add Books", "Remove Books", "exit"], [addBooks, delBooks, die])
+
 dbw.write(json.dumps(dbfr))
