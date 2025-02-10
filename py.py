@@ -71,18 +71,14 @@ def search():
         print("not found")
 
 
-ctrl = 0
-
-
 def die():
-    global ctrl
-    ctrl = 1
+    dbw.write(json.dumps(dbfr))
+    print("ty for using ig")
+    exit()
 
 
-while ctrl == 0:
+while True:
     selector(
         ["Add Books", "Remove Books", "Update Books", "search", "List Books", "exit"],
         [addBooks, delBooks, upBooks, search, listBooks, die],
     )
-
-dbw.write(json.dumps(dbfr))
