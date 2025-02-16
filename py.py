@@ -5,8 +5,6 @@ try:
 except FileNotFoundError:
     dbfr = {"books": {}}
 
-dbw = open("test.json", "w")
-
 
 def selector(ls, funcs):
     for k in range(0, len(ls)):
@@ -19,6 +17,10 @@ def selector(ls, funcs):
         selector(ls, funcs)
     else:
         funcs[c]()
+
+def dump():
+    dbw = open("test.json", "w")
+    dbw.write(json.dumps(dbfr))
 
 
 def addBooks():
@@ -75,12 +77,12 @@ def search():
 
 
 def die():
-    dbw.write(json.dumps(dbfr))
     print("ty for using ig")
     exit()
 
 
 while True:
+    dump()
     selector(
         ["Add Books", "Remove Books", "Update Books", "search", "List Books", "exit"],
         [addBooks, delBooks, upBooks, search, listBooks, die],
