@@ -2,7 +2,7 @@ import json
 
 try:
     dbfr = json.load(open("test.json"))
-except FileNotFoundError:
+except (FileNotFoundError, json.JSONDecodeError):
     dbfr = {"books": {}}
 
 
@@ -10,13 +10,15 @@ def selector(ls, funcs):
     for k in range(0, len(ls)):
         print(k + 1, ":", ls[k])
 
-    c = int(input("choose")) - 1
+    try:
+        c = int(input("choose")) - 1
+        if c >= len(ls) or c < 0:
+            print("not in range")
+        else:
+            funcs[c]()
+    except ValueError:  # also catches letters in pgs lmfao
+        print("enter a no")
 
-    if c >= len(ls) or c < 0:
-        print("not in range")
-        selector(ls, funcs)
-    else:
-        funcs[c]()
 
 def dump():
     dbw = open("test.json", "w")
@@ -25,9 +27,12 @@ def dump():
 
 def addBooks():
     name = input("name")
-    pgs = input("pages")
-    gen = input("genres (separated by spaces)")
-    dbfr["books"].update({name: {"pages": pgs, "genres": gen.split()}})
+    if name not in dbfr["books"]:
+        pgs = int(input("pages"))
+        gen = input("genres (separated by spaces)").split()
+        dbfr["books"].update({name: {"pages": pgs, "genres": gen}})
+    else:
+        print("book already exists")
 
 
 def delBooks():
@@ -42,20 +47,24 @@ def upBooks():
     oname = input("name")
 
     try:
-        tmp = dbfr["books"].get(oname)
-        dbfr["books"].pop(oname)
+        tmp = dbfr["books"][oname]
 
         for i in tmp:
-            new = input("Enter new " + i + " (leave blank for no change)")
+            new = input(f"Enter new {i} (leave blank for no change)")
             if new != "":
                 if i == "genres":
                     tmp[i] = new.split()
+                elif i == "pages":
+                    tmp[i] = int(new)
                 else:
                     tmp[i] = new
                 new = ""
 
         nname = input("new name") or oname
+
+        dbfr["books"].pop(oname)
         dbfr["books"].update({nname: tmp})
+
     except KeyError:
         print("not found")
 
