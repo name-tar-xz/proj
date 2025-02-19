@@ -8,17 +8,17 @@ except (FileNotFoundError, json.JSONDecodeError):
 
 def selector(ls, funcs, key=""):
 	for k in range(0, len(ls)):
-		print(k + 1, ":", ls[k])
+		print(k, ":", ls[k])
 
 	try:
-		c = int(input("choose")) - 1
+		c = int(input("choose"))
 		if c >= len(ls) or c < 0:
 			print("not in range")
 		else:
-			if key == "":
-				funcs[c]()
-			else:
+			try:
 				funcs[c](key)
+			except TypeError:  # errors as control flow are bad but wtv
+				funcs[c]()
 	except ValueError:  # also catches letters in pgs lmfao
 		print("enter a no")
 
@@ -29,14 +29,18 @@ def dump():
 
 
 def addKey(key):
+	global curUser
 	name = input("name")
-	if name not in db[key]:
+	dc = {}
+	if name not in db[key] and name != "":
 		if key == "books":
 			pgs = int(input("pages"))
 			gen = input("genres (separated by spaces)").split()
 			dc = {"pages": pgs, "genres": gen}
 		elif key == "users":
-			dc = {}
+			dc = {"admin": False}
+			if curUser == "":
+				curUser = name
 
 		db[key].update({name: dc})
 	else:
@@ -52,12 +56,13 @@ def delKey(key):
 
 
 def upKey(key):
-	oname = input("name")
-
+	global curUser
+	oname = ""
+	tmp = {}
 	try:
-		tmp = db[key][oname]
-
 		if key == "books":
+			oname = input("name")
+			tmp = db[key][oname]
 			for i in tmp:
 				new = input(f"Enter new {i} (leave blank for no change)")
 				if new != "":
@@ -69,7 +74,10 @@ def upKey(key):
 						tmp[i] = new
 					new = ""
 		elif key == "users":
-			pass
+			if db[key][curUser]["admin"]:
+				oname = input("name")
+			else:
+				oname = curUser
 
 		nname = input("new name") or oname
 
@@ -96,20 +104,58 @@ def search(key):
 		print("not found")
 
 
+curUser = ""
+inside = False
+
+
+def outside():
+	global inside
+	inside = False
+
+
+def login():
+	name = input("name")
+	if name in db["users"]:
+		global curUser
+		curUser = name
+
+
+def logout():
+	global curUser
+	curUser = ""
+
+
 def books():
-	selector(
-		["Add Books", "Remove Books", "Update Books", "Search Books", "List Books"],
-		[addKey, delKey, upKey, search, listKeys],
-		"books",
-	)
+	global inside
+	inside = True
+
+	destr = ["Back", "Search Books", "List Books"]
+	defunc = [outside, search, listKeys]
+
+	while inside:
+		if curUser != "" and db["users"][curUser]["admin"]:
+			selector(destr + ["Add Books", "Remove Books", "Update Books"], defunc + [addKey, delKey, upKey], "books")
+		elif curUser != "":
+			selector(destr, defunc, "books")
+		else:
+			selector(destr, defunc, "books")
 
 
 def users():
-	selector(
-		["Add Users", "Remove Users", "Update Users", "Search Users", "List Users"],
-		[addKey, delKey, upKey, search, listKeys],
-		"users",
-	)
+	global inside
+	inside = True
+
+	destr = ["Back", "Sign Up Users"]
+	defunc = [outside, addKey]
+
+	while inside:
+		if curUser == "":
+			selector(destr + ["Login"], defunc + [login], "users")
+			outside()
+		elif curUser != "" and db["users"][curUser]["admin"]:
+			selector(destr + ["Remove Users", "Update Users", "Search Users", "Log Out"], defunc + [delKey, upKey, search, logout], "users")
+		else:
+			selector(["Update Info", "Logout"], [upKey, logout], "users")
 
 
 def die():
@@ -119,4 +165,4 @@ def die():
 
 while True:
 	dump()
-	selector(["Books", "Users", "Exit"], [books, users, die])
+	selector(["Exit", "Books", "Users"], [die, books, users])
