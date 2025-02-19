@@ -36,9 +36,9 @@ def addKey(key):
 		if key == "books":
 			pgs = int(input("pages"))
 			gen = input("genres (separated by spaces)").split()
-			dc = {"pages": pgs, "genres": gen}
+			dc = {"pages": pgs, "genres": gen, "borrowed": False}
 		elif key == "users":
-			dc = {"admin": False}
+			dc = {"admin": False, "borrowed": []}
 			if curUser == "":
 				curUser = name
 
@@ -104,6 +104,24 @@ def search(key):
 		print("not found")
 
 
+def borrow():
+	name = input("name")
+	if name in db["books"] and not db["books"][name]["borrowed"]:
+		db["books"][name].update({"borrowed": True})
+		db["users"][curUser]["borrowed"].append(name)
+	else:
+		print(f"{name} not borrowable")
+
+
+def ret():
+	name = input("name")
+	if name in db["users"][curUser]["borrowed"] and db["books"][name]["borrowed"]:
+		db["books"][name].update({"borrowed": False})
+		db["users"][curUser]["borrowed"].remove(name)
+	else:
+		print(f"{name} not borrowed")
+
+
 curUser = ""
 inside = False
 
@@ -136,7 +154,7 @@ def books():
 		if curUser != "" and db["users"][curUser]["admin"]:
 			selector(destr + ["Add Books", "Remove Books", "Update Books"], defunc + [addKey, delKey, upKey], "books")
 		elif curUser != "":
-			selector(destr, defunc, "books")
+			selector(destr + ["Borrow Books", "Return Books"], defunc + [borrow, ret], "books")
 		else:
 			selector(destr, defunc, "books")
 
@@ -155,7 +173,7 @@ def users():
 		elif curUser != "" and db["users"][curUser]["admin"]:
 			selector(destr + ["Remove Users", "Update Users", "Search Users", "Log Out"], defunc + [delKey, upKey, search, logout], "users")
 		else:
-			selector(["Update Info", "Logout"], [upKey, logout], "users")
+			selector(["Update Info", "Log Out"], [upKey, logout], "users")
 
 
 def die():
