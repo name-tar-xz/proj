@@ -1,7 +1,7 @@
 import json
 
 try:
-	dbfr = json.load(open("test.json"))
+	dbfr = json.load(open("db.json"))
 except (FileNotFoundError, json.JSONDecodeError):
 	dbfr = {"books": {}, "users": {}}
 
@@ -24,7 +24,7 @@ def selector(ls, funcs, key=""):
 
 
 def dump():
-	dbw = open("test.json", "w")
+	dbw = open("db.json", "w")
 	dbw.write(json.dumps(dbfr))
 
 
