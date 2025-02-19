@@ -3,10 +3,10 @@ import json
 try:
 	dbfr = json.load(open("test.json"))
 except (FileNotFoundError, json.JSONDecodeError):
-	dbfr = {"books": {}}
+	dbfr = {"books": {}, "users": {}}
 
 
-def selector(ls, funcs):
+def selector(ls, funcs, key=""):
 	for k in range(0, len(ls)):
 		print(k + 1, ":", ls[k])
 
@@ -15,7 +15,10 @@ def selector(ls, funcs):
 		if c >= len(ls) or c < 0:
 			print("not in range")
 		else:
-			funcs[c]()
+			if key == "":
+				funcs[c]()
+			else:
+				funcs[c](key)
 	except ValueError:  # also catches letters in pgs lmfao
 		print("enter a no")
 
@@ -25,64 +28,90 @@ def dump():
 	dbw.write(json.dumps(dbfr))
 
 
-def addBooks():
+def addKey(key):
 	name = input("name")
-	if name not in dbfr["books"]:
-		pgs = int(input("pages"))
-		gen = input("genres (separated by spaces)").split()
-		dbfr["books"].update({name: {"pages": pgs, "genres": gen}})
+	if name not in dbfr[key]:
+		if key == "books":
+			pgs = int(input("pages"))
+			gen = input("genres (separated by spaces)").split()
+			dc = {"pages": pgs, "genres": gen}
+		elif key == "users":
+			dc = {}
+		else:
+			dc = {}
+
+		dbfr[key].update({name: dc})
 	else:
-		print("book already exists")
+		print(f"{key} already exists")
 
 
-def delBooks():
+def delKey(key):
 	name = input("name")
 	try:
-		dbfr["books"].pop(name)
+		dbfr[key].pop(name)
 	except KeyError:
-		print("not found")
+		print(f"{name} not found in {key}")
 
 
-def upBooks():
+def upKey(key):
 	oname = input("name")
 
 	try:
-		tmp = dbfr["books"][oname]
+		tmp = dbfr[key][oname]
 
-		for i in tmp:
-			new = input(f"Enter new {i} (leave blank for no change)")
-			if new != "":
-				if i == "genres":
-					tmp[i] = new.split()
-				elif i == "pages":
-					tmp[i] = int(new)
-				else:
-					tmp[i] = new
-				new = ""
+		if key == "books":
+			for i in tmp:
+				new = input(f"Enter new {i} (leave blank for no change)")
+				if new != "":
+					if i == "genres":
+						tmp[i] = new.split()
+					elif i == "pages":
+						tmp[i] = int(new)
+					else:
+						tmp[i] = new
+					new = ""
+		elif key == "users":
+			pass
 
 		nname = input("new name") or oname
 
-		dbfr["books"].pop(oname)
-		dbfr["books"].update({nname: tmp})
+		dbfr[key].pop(oname)
+		dbfr[key].update({nname: tmp})
 
 	except KeyError:
-		print("not found")
+		print(f"{oname} not found in {key}")
 
 
-def listBooks():
-	for i in dbfr["books"]:
+def listKeys(key):
+	for i in dbfr[key]:
 		print(i)
 
 
-def search():
+def search(key):
 	search = input("search").lower()
 	k = True
-	for i in dbfr["books"]:
+	for i in dbfr[key]:
 		if search in i.lower():
 			k = False
 			print("found", i)
 	if k:
 		print("not found")
+
+
+def books():
+	selector(
+		["Add Books", "Remove Books", "Update Books", "Search Books", "List Books"],
+		[addKey, delKey, upKey, search, listKeys],
+		"books",
+	)
+
+
+def users():
+	selector(
+		["Add Users", "Remove Users", "Update Users", "Search Users", "List Users"],
+		[addKey, delKey, upKey, search, listKeys],
+		"users",
+	)
 
 
 def die():
@@ -92,7 +121,4 @@ def die():
 
 while True:
 	dump()
-	selector(
-		["Add Books", "Remove Books", "Update Books", "search", "List Books", "exit"],
-		[addBooks, delBooks, upBooks, search, listBooks, die],
-	)
+	selector(["Books", "Users", "Exit"], [books, users, die])
