@@ -1,9 +1,9 @@
 import json
 
 try:
-	dbfr = json.load(open("db.json"))
+	db = json.load(open("db.json"))
 except (FileNotFoundError, json.JSONDecodeError):
-	dbfr = {"books": {}, "users": {}}
+	db = {"books": {}, "users": {"root": {"admin": True}}}
 
 
 def selector(ls, funcs, key=""):
@@ -25,22 +25,20 @@ def selector(ls, funcs, key=""):
 
 def dump():
 	dbw = open("db.json", "w")
-	dbw.write(json.dumps(dbfr))
+	dbw.write(json.dumps(db))
 
 
 def addKey(key):
 	name = input("name")
-	if name not in dbfr[key]:
+	if name not in db[key]:
 		if key == "books":
 			pgs = int(input("pages"))
 			gen = input("genres (separated by spaces)").split()
 			dc = {"pages": pgs, "genres": gen}
 		elif key == "users":
 			dc = {}
-		else:
-			dc = {}
 
-		dbfr[key].update({name: dc})
+		db[key].update({name: dc})
 	else:
 		print(f"{key} already exists")
 
@@ -48,7 +46,7 @@ def addKey(key):
 def delKey(key):
 	name = input("name")
 	try:
-		dbfr[key].pop(name)
+		db[key].pop(name)
 	except KeyError:
 		print(f"{name} not found in {key}")
 
@@ -57,7 +55,7 @@ def upKey(key):
 	oname = input("name")
 
 	try:
-		tmp = dbfr[key][oname]
+		tmp = db[key][oname]
 
 		if key == "books":
 			for i in tmp:
@@ -75,22 +73,22 @@ def upKey(key):
 
 		nname = input("new name") or oname
 
-		dbfr[key].pop(oname)
-		dbfr[key].update({nname: tmp})
+		db[key].pop(oname)
+		db[key].update({nname: tmp})
 
 	except KeyError:
 		print(f"{oname} not found in {key}")
 
 
 def listKeys(key):
-	for i in dbfr[key]:
+	for i in db[key]:
 		print(i)
 
 
 def search(key):
 	search = input("search").lower()
 	k = True
-	for i in dbfr[key]:
+	for i in db[key]:
 		if search in i.lower():
 			k = False
 			print("found", i)
