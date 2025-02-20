@@ -36,8 +36,9 @@ def addKey(key):
 	if name not in db[key] and name != "":
 		if key == "books":
 			pgs = int(input("pages"))
+			stock = int(input("stock"))
 			gen = input("genres (separated by spaces)").split()
-			dc = {"pages": pgs, "genres": gen, "borrowed": False}
+			dc = {"pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
 		elif key == "users":
 			dc = {"admin": False, "borrowed": {}}
 			if curUser == "":
@@ -107,8 +108,9 @@ def search(key):
 
 def borrow():
 	name = input("name")
-	if name in db["books"] and not db["books"][name]["borrowed"]:
-		db["books"][name].update({"borrowed": True})
+	if name in db["books"] and db["books"][name]["stock"]:
+		db["books"][name].update({"borrowed": db["books"][name]["borrowed"] + 1})
+		db["books"][name].update({"stock": db["books"][name]["stock"] - 1})
 		db["users"][curUser]["borrowed"].update({name: int(time.time())})
 	else:
 		print(f"{name} not borrowable")
@@ -122,7 +124,8 @@ def ret():
 		if t > due:
 			print(f"Please pay late fine of {500 * (t // due)}")
 
-		db["books"][name].update({"borrowed": False})
+		db["books"][name].update({"borrowed": db["books"][name]["borrowed"] - 1})
+		db["books"][name].update({"stock": db["books"][name]["stock"] + 1})
 		db["users"][curUser]["borrowed"].pop(name)
 	else:
 		print(f"{name} not borrowed")
