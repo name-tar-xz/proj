@@ -1,4 +1,5 @@
 import json
+import time
 
 try:
 	db = json.load(open("db.json"))
@@ -38,7 +39,7 @@ def addKey(key):
 			gen = input("genres (separated by spaces)").split()
 			dc = {"pages": pgs, "genres": gen, "borrowed": False}
 		elif key == "users":
-			dc = {"admin": False, "borrowed": []}
+			dc = {"admin": False, "borrowed": {}}
 			if curUser == "":
 				curUser = name
 
@@ -108,7 +109,7 @@ def borrow():
 	name = input("name")
 	if name in db["books"] and not db["books"][name]["borrowed"]:
 		db["books"][name].update({"borrowed": True})
-		db["users"][curUser]["borrowed"].append(name)
+		db["users"][curUser]["borrowed"].update({name: int(time.time())})
 	else:
 		print(f"{name} not borrowable")
 
@@ -116,8 +117,13 @@ def borrow():
 def ret():
 	name = input("name")
 	if name in db["users"][curUser]["borrowed"] and db["books"][name]["borrowed"]:
+		t = int(time.time()) - db["users"][curUser]["borrowed"][name]
+		due = 7 * 24 * 60 * 60  # 1 week
+		if t > due:
+			print(f"Please pay late fine of {500 * (t // due)}")
+
 		db["books"][name].update({"borrowed": False})
-		db["users"][curUser]["borrowed"].remove(name)
+		db["users"][curUser]["borrowed"].pop(name)
 	else:
 		print(f"{name} not borrowed")
 
