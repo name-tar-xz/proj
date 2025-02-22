@@ -2,6 +2,9 @@ import json
 import time
 import hashlib
 
+curUser = ""
+inside = False
+
 try:
 	db = json.load(open("db.json"))
 except FileNotFoundError:
@@ -39,7 +42,8 @@ def addKey(key):
 			pgs = int(input("pages"))
 			stock = int(input("stock"))
 			gen = input("genres (separated by spaces)").split()
-			dc = {"pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
+			author = input("author")
+			dc = {"author": author, "pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
 		elif key == "users":
 			passwd = hashlib.md5(input("password").encode()).hexdigest()
 			dc = {"password": passwd, "admin": False, "borrowed": {}}
@@ -154,10 +158,6 @@ def ret():
 		print(f"{name} not borrowed")
 
 
-curUser = ""
-inside = False
-
-
 def outside():
 	global inside
 	inside = False
@@ -169,6 +169,8 @@ def login():
 	if name in db["users"] and passwd == db["users"][name]["password"]:
 		global curUser
 		curUser = name
+	else:
+		print("failed")
 
 
 def logout():
@@ -177,6 +179,7 @@ def logout():
 
 
 def books():
+	dump()
 	global inside
 	inside = True
 
@@ -193,6 +196,7 @@ def books():
 
 
 def users():
+	dump()
 	global inside
 	inside = True
 
@@ -201,18 +205,20 @@ def users():
 
 	while inside:
 		if curUser == "":
-			selector(destr + ["Login"], defunc + [login], "users")
+			selector(["Continue Logged Out", "Sign Up", "Login"], [outside, addKey, login], "users")
 			outside()
 		elif curUser != "" and db["users"][curUser]["admin"]:
 			selector(destr + ["Remove Users", "Update Users", "Search Users", "Log Out"], defunc + [delKey, upKey, search, logout], "users")
 		else:
-			selector(["Update Info", "Log Out"], [upKey, logout], "users")
+			selector(destr + ["Update Info", "Log Out"], defunc + [upKey, logout], "users")
 
 
 def die():
 	print("ty for using ig")
 	exit()
 
+
+users()
 
 while True:
 	dump()
