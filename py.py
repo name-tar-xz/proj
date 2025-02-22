@@ -1,10 +1,11 @@
 import json
 import time
+import hashlib
 
 try:
 	db = json.load(open("db.json"))
-except (FileNotFoundError, json.JSONDecodeError):
-	db = {"books": {}, "users": {"root": {"admin": True}}}
+except FileNotFoundError:
+	db = {"books": {}, "users": {"root": {"admin": True, "password": hashlib.md5(b"root").hexdigest()}}}
 
 
 def selector(ls, funcs, key=""):
@@ -40,7 +41,8 @@ def addKey(key):
 			gen = input("genres (separated by spaces)").split()
 			dc = {"pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
 		elif key == "users":
-			dc = {"admin": False, "borrowed": {}}
+			passwd = hashlib.md5(input("password").encode()).hexdigest()
+			dc = {"password": passwd, "admin": False, "borrowed": {}}
 			if curUser == "":
 				curUser = name
 
@@ -64,6 +66,7 @@ def upKey(key):
 	try:
 		if key == "books":
 			oname = input("name")
+			nname = input("new name") or oname
 			tmp = db[key][oname]
 			for i in tmp:
 				new = input(f"Enter new {i} (leave blank for no change)")
@@ -76,15 +79,35 @@ def upKey(key):
 						tmp[i] = new
 					new = ""
 		elif key == "users":
+			global curUser
 			if db[key][curUser]["admin"]:
 				oname = input("name")
+				admin = input("admin")
 			else:
 				oname = curUser
 
-		nname = input("new name") or oname
+			nname = input("new name") or oname
+			curUser = nname
+
+			tmp = db[key][oname]
+			try:
+				tmp["admin"] = (admin.lower() == "yes" or "y") and True or False
+			except UnboundLocalError:
+				pass
+
+			for i in tmp:
+				if i != "admin":
+					new = input(f"Enter new {i} (leave blank for no change)")
+					if new != "":
+						if i == "password":
+							tmp[i] = hashlib.md5(new.encode()).hexdigest()
+						else:
+							tmp[i] = new
+						new = ""
 
 		db[key].pop(oname)
 		db[key].update({nname: tmp})
+		dump()
 
 	except KeyError:
 		print(f"{oname} not found in {key}")
@@ -142,7 +165,8 @@ def outside():
 
 def login():
 	name = input("name")
-	if name in db["users"]:
+	passwd = hashlib.md5(input("passwd").encode()).hexdigest()
+	if name in db["users"] and passwd == db["users"][name]["password"]:
 		global curUser
 		curUser = name
 
