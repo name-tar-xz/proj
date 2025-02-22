@@ -1,6 +1,6 @@
 import json
-import time
-import hashlib
+from time import time
+from hashlib import blake2b
 
 curUser = ""
 inside = False
@@ -8,7 +8,7 @@ inside = False
 try:
 	db = json.load(open("db.json"))
 except FileNotFoundError:
-	db = {"books": {}, "users": {"root": {"admin": True, "password": hashlib.md5(b"root").hexdigest()}}}
+	db = {"books": {}, "users": {"root": {"admin": True, "password": blake2b(b"root").hexdigest()}}}
 
 
 def selector(ls, funcs, key=""):
@@ -45,7 +45,7 @@ def addKey(key):
 			author = input("author")
 			dc = {"author": author, "pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
 		elif key == "users":
-			passwd = hashlib.md5(input("password").encode()).hexdigest()
+			passwd = blake2b(input("password").encode()).hexdigest()
 			dc = {"password": passwd, "admin": False, "borrowed": {}}
 			if curUser == "":
 				curUser = name
@@ -104,7 +104,7 @@ def upKey(key):
 					new = input(f"Enter new {i} (leave blank for no change)")
 					if new != "":
 						if i == "password":
-							tmp[i] = hashlib.md5(new.encode()).hexdigest()
+							tmp[i] = blake2b(new.encode()).hexdigest()
 						else:
 							tmp[i] = new
 						new = ""
@@ -138,7 +138,7 @@ def borrow():
 	if name in db["books"] and db["books"][name]["stock"]:
 		db["books"][name].update({"borrowed": db["books"][name]["borrowed"] + 1})
 		db["books"][name].update({"stock": db["books"][name]["stock"] - 1})
-		db["users"][curUser]["borrowed"].update({name: int(time.time())})
+		db["users"][curUser]["borrowed"].update({name: int(time())})
 	else:
 		print(f"{name} not borrowable")
 
@@ -146,7 +146,7 @@ def borrow():
 def ret():
 	name = input("name")
 	if name in db["users"][curUser]["borrowed"] and db["books"][name]["borrowed"]:
-		t = int(time.time()) - db["users"][curUser]["borrowed"][name]
+		t = int(time()) - db["users"][curUser]["borrowed"][name]
 		due = 7 * 24 * 60 * 60  # 1 week
 		if t > due:
 			print(f"Please pay late fine of {500 * (t // due)}")
@@ -165,7 +165,7 @@ def outside():
 
 def login():
 	name = input("name")
-	passwd = hashlib.md5(input("passwd").encode()).hexdigest()
+	passwd = blake2b(input("passwd").encode()).hexdigest()
 	if name in db["users"] and passwd == db["users"][name]["password"]:
 		global curUser
 		curUser = name
