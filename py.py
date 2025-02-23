@@ -36,7 +36,6 @@ def dump():
 def addKey(key):
 	global curUser
 	name = input("Input name: ")
-	dc = {}
 	if name not in db[key] and name != "":
 		if key == "books":
 			pgs = int(input("Input no of pages: "))
@@ -65,25 +64,12 @@ def delKey(key):
 
 def upKey(key):
 	global curUser
-	oname = ""
-	tmp = {}
 	try:
 		if key == "books":
 			oname = input(f"Enter {key} to modify: ")
 			nname = input("Enter new name (blank for no change): ") or oname
 			tmp = db[key][oname]
-			for i in tmp:
-				new = input(f"Enter new {i} (blank for no change): ")
-				if new != "":
-					if i == "genres":
-						tmp[i] = new.split()
-					elif i == "pages":
-						tmp[i] = int(new)
-					else:
-						tmp[i] = new
-					new = ""
 		elif key == "users":
-			global curUser
 			if db[key][curUser]["admin"]:
 				oname = input(f"Enter {key} to modify: ")
 				admin = input("Make user admin (y/n): ")
@@ -94,20 +80,25 @@ def upKey(key):
 			curUser = nname
 
 			tmp = db[key][oname]
+
 			try:
 				tmp["admin"] = (admin.lower() == "yes" or "y") and True or False
 			except UnboundLocalError:
 				pass
 
-			for i in tmp:
-				if i != "admin":
-					new = input(f"Enter new {i} (leave blank for no change): ")
-					if new != "":
-						if i == "password":
-							tmp[i] = blake2b(new.encode()).hexdigest()
-						else:
-							tmp[i] = new
-						new = ""
+		for i in tmp:
+			if i != "admin" and i != "borrowed":
+				new = input(f"Enter new {i} (blank for no change): ")
+				if new != "":
+					if i == "genres":
+						tmp[i] = new.split()
+					elif i == "pages" or i == "stock":
+						tmp[i] = int(new)
+					elif i == "password":
+						tmp[i] = blake2b(new.encode()).hexdigest()
+					else:
+						tmp[i] = new
+					new = ""
 
 		db[key].pop(oname)
 		db[key].update({nname: tmp})
