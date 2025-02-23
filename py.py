@@ -205,10 +205,11 @@ def users():
 
 
 def die():
-	print("Thank you for using")
+	print("Thank you for using our LMS")
 	exit()
 
 
+print("Welcome to the LMS")
 users()
 
 while True:
