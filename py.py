@@ -16,16 +16,16 @@ def selector(ls, funcs, key=""):
 		print(k, ":", ls[k])
 
 	try:
-		c = int(input("choose"))
+		c = int(input("Choose one of the above: "))
 		if c >= len(ls) or c < 0:
-			print("not in range")
+			print("Entered number not in range")
 		else:
 			try:
 				funcs[c](key)
-			except TypeError:  # errors as control flow are bad but wtv
+			except TypeError:
 				funcs[c]()
-	except ValueError:  # also catches letters in pgs lmfao
-		print("enter a no")
+	except ValueError:
+		print("Enter a valid number")
 
 
 def dump():
@@ -35,32 +35,32 @@ def dump():
 
 def addKey(key):
 	global curUser
-	name = input("name")
+	name = input("Input name: ")
 	dc = {}
 	if name not in db[key] and name != "":
 		if key == "books":
-			pgs = int(input("pages"))
-			stock = int(input("stock"))
-			gen = input("genres (separated by spaces)").split()
-			author = input("author")
+			pgs = int(input("Input no of pages: "))
+			stock = int(input("Input stock: "))
+			gen = input("Input genres (separated by spaces): ").split()
+			author = input("Input author: ")
 			dc = {"author": author, "pages": pgs, "genres": gen, "stock": stock, "borrowed": 0}
 		elif key == "users":
-			passwd = blake2b(input("password").encode()).hexdigest()
+			passwd = blake2b(input("Enter your password: ").encode()).hexdigest()
 			dc = {"password": passwd, "admin": False, "borrowed": {}}
 			if curUser == "":
 				curUser = name
 
 		db[key].update({name: dc})
 	else:
-		print(f"{key} already exists")
+		print(key, "already exists")
 
 
 def delKey(key):
-	name = input("name")
+	name = input("Input name to delete: ")
 	try:
 		db[key].pop(name)
 	except KeyError:
-		print(f"{name} not found in {key}")
+		print(name, "not found in", key)
 
 
 def upKey(key):
@@ -69,11 +69,11 @@ def upKey(key):
 	tmp = {}
 	try:
 		if key == "books":
-			oname = input("name")
-			nname = input("new name") or oname
+			oname = input(f"Enter {key} to modify: ")
+			nname = input("Enter new name (blank for no change): ") or oname
 			tmp = db[key][oname]
 			for i in tmp:
-				new = input(f"Enter new {i} (leave blank for no change)")
+				new = input(f"Enter new {i} (blank for no change): ")
 				if new != "":
 					if i == "genres":
 						tmp[i] = new.split()
@@ -85,12 +85,12 @@ def upKey(key):
 		elif key == "users":
 			global curUser
 			if db[key][curUser]["admin"]:
-				oname = input("name")
-				admin = input("admin")
+				oname = input(f"Enter {key} to modify: ")
+				admin = input("Make user admin (y/n): ")
 			else:
 				oname = curUser
 
-			nname = input("new name") or oname
+			nname = input("Enter new username (blank for no change): ") or oname
 			curUser = nname
 
 			tmp = db[key][oname]
@@ -101,7 +101,7 @@ def upKey(key):
 
 			for i in tmp:
 				if i != "admin":
-					new = input(f"Enter new {i} (leave blank for no change)")
+					new = input(f"Enter new {i} (leave blank for no change): ")
 					if new != "":
 						if i == "password":
 							tmp[i] = blake2b(new.encode()).hexdigest()
@@ -114,7 +114,7 @@ def upKey(key):
 		dump()
 
 	except KeyError:
-		print(f"{oname} not found in {key}")
+		print(oname, "not found in", key)
 
 
 def listKeys(key):
@@ -123,28 +123,28 @@ def listKeys(key):
 
 
 def search(key):
-	search = input("search").lower()
+	search = input("Enter search term: ").lower()
 	k = True
 	for i in db[key]:
 		if search in i.lower():
 			k = False
-			print("found", i)
+			print("Found:", i)
 	if k:
-		print("not found")
+		print(search, "not found")
 
 
 def borrow():
-	name = input("name")
+	name = input("Book to borrow: ")
 	if name in db["books"] and db["books"][name]["stock"]:
 		db["books"][name].update({"borrowed": db["books"][name]["borrowed"] + 1})
 		db["books"][name].update({"stock": db["books"][name]["stock"] - 1})
 		db["users"][curUser]["borrowed"].update({name: int(time())})
 	else:
-		print(f"{name} not borrowable")
+		print(name, "is not borrowable")
 
 
 def ret():
-	name = input("name")
+	name = input("Book to return: ")
 	if name in db["users"][curUser]["borrowed"] and db["books"][name]["borrowed"]:
 		t = int(time()) - db["users"][curUser]["borrowed"][name]
 		due = 7 * 24 * 60 * 60  # 1 week
@@ -155,7 +155,7 @@ def ret():
 		db["books"][name].update({"stock": db["books"][name]["stock"] + 1})
 		db["users"][curUser]["borrowed"].pop(name)
 	else:
-		print(f"{name} not borrowed")
+		print(name, "has not been borrowed")
 
 
 def outside():
@@ -164,13 +164,13 @@ def outside():
 
 
 def login():
-	name = input("name")
-	passwd = blake2b(input("passwd").encode()).hexdigest()
+	name = input("Username: ")
+	passwd = blake2b(input("Password: ").encode()).hexdigest()
 	if name in db["users"] and passwd == db["users"][name]["password"]:
 		global curUser
 		curUser = name
 	else:
-		print("failed")
+		print("Failed to login")
 
 
 def logout():
@@ -214,7 +214,7 @@ def users():
 
 
 def die():
-	print("ty for using ig")
+	print("Thank you for using")
 	exit()
 
 
