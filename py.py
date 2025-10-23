@@ -51,7 +51,7 @@ def addKey(key):
 
 		db[key].update({name: dc})
 	else:
-		print(key, "already exists")
+		print(key[:-1], "already exists")
 
 
 def delKey(key):
@@ -72,7 +72,7 @@ def upKey(key):
 		elif key == "users":
 			if db[key][curUser]["admin"]:
 				oname = input(f"Enter {key} to modify: ")
-				admin = input("Make user admin (y/n): ")
+				admin = input("Make user admin [y/N]: ")
 			else:
 				oname = curUser
 
@@ -131,7 +131,7 @@ def borrow():
 		db["books"][name].update({"stock": db["books"][name]["stock"] - 1})
 		db["users"][curUser]["borrowed"].update({name: int(time())})
 	else:
-		print(name, "is not borrowable")
+		print(name, "cannot be borrowed")
 
 
 def ret():
